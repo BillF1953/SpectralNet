@@ -7,11 +7,10 @@ import h5py
 
 import numpy as np
 from sklearn import preprocessing
-
+import pandas as pd
 from keras import backend as K
 from keras.datasets import mnist
 from keras.models import model_from_json
-
 from core import pairs
 
 def get_data(params, data=None):
@@ -37,12 +36,35 @@ def get_data(params, data=None):
     '''
     ret = {}
 
+    data = True
     # get data if not provided
     if data is None:
         x_train, x_test, y_train, y_test = load_data(params)
+
     else:
         print("WARNING: Using data provided in arguments. Must be tuple or array of format (x_train, x_test, y_train, y_test)")
+
+
+        ### Tyler and Tristans Code
+        data = pd.read_csv(
+            "/home/tylerf/Dropbox/Montana State/SpectralClusteringProject/poker_data_processed_for_Tristan.csv")
+
+        data_y = data["Y"]
+        data = data.drop(columns=['Flop', 'Turn', 'River', 'num1', 'num2', 'num3', 'Y'])
+        data = data.drop_duplicates()
+        train_percent = .8
+        training_set_size = int(len(data) * train_percent)
+        x_train = data.iloc[0:training_set_size].as_matrix()
+        x_test = data.iloc[training_set_size:len(data)].as_matrix()
+        y_test = data_y.iloc[training_set_size:len(data_y)].as_matrix()
+        y_train = data_y.iloc[0:training_set_size].as_matrix()
+
+        data = x_train, x_test, y_train, y_test
+
         x_train, x_test, y_train, y_test = data
+        ####
+
+
 
     ret['spectral'] = {}
     if params.get('use_all_data'):
@@ -336,6 +358,13 @@ def get_mnist():
     x_train = np.expand_dims(x_train, -1) / 255
     x_test = np.expand_dims(x_test, -1) / 255
     return x_train, x_test, y_train, y_test
+
+
+
+
+
+
+
 
 def pre_process(x_train, x_test, standardize):
     '''

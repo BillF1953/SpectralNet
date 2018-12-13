@@ -5,6 +5,7 @@ import sys, os, pickle
 import tensorflow as tf
 import numpy as np
 import traceback
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 
 from sklearn.cluster import KMeans
@@ -35,6 +36,7 @@ def run_net(data, params):
         pairs_train, dist_train, pairs_val, dist_val = data['siamese']['train_and_test']
 
     x = np.concatenate((x_train, x_val, x_test), axis=0)
+
     y = np.concatenate((y_train, y_val, y_test), axis=0)
 
     if len(x_train_labeled):
@@ -47,7 +49,7 @@ def run_net(data, params):
     #
 
     # create true y placeholder (not used in unsupervised training)
-    y_true = tf.placeholder(tf.float32, shape=(None, params['n_clusters']), name='y_true')
+    y_true = tf.placeholder(tf.float64, shape=(None, params['n_clusters']), name='y_true')
 
     batch_sizes = {
             'Unlabeled': params['batch_size'],
@@ -58,6 +60,7 @@ def run_net(data, params):
     input_shape = x.shape[1:]
 
     # spectralnet has three inputs -- they are defined here
+
     inputs = {
             'Unlabeled': Input(shape=input_shape,name='UnlabeledInput'),
             'Labeled': Input(shape=input_shape,name='LabeledInput'),
@@ -103,7 +106,16 @@ def run_net(data, params):
     x_spectralnet = spectral_net.predict(x)
 
     # get accuracy and nmi
+
     kmeans_assignments, km = get_cluster_sols(x_spectralnet, ClusterClass=KMeans, n_clusters=params['n_clusters'], init_args={'n_init':10})
+    print(kmeans_assignments)
+
+    #### Tyler and Tristans Code
+    pickle.dump(kmeans_assignments, open("/home/tylerf/Dropbox/Montana "
+                                         "State/SpectralClusteringProject/clusterAssignment5_3000.p", "wb"))
+
+
+    #This compares to the previous solution
     y_spectralnet, _ = get_y_preds(kmeans_assignments, y, params['n_clusters'])
     print_accuracy(kmeans_assignments, y, params['n_clusters'])
     from sklearn.metrics import normalized_mutual_info_score as nmi

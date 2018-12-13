@@ -3,8 +3,9 @@ train.py: contains all training and prediction backend functions for spectral ne
 '''
 from keras import backend as K
 from .util import make_batches
-
+import logging as logging
 import numpy as np
+logging.basicConfig(level=logging.DEBUG)
 
 def check_inputs(x_unlabeled, x_labeled, y_labeled, y_true):
     '''
@@ -51,6 +52,8 @@ def train_step(return_var, updates, x_unlabeled, inputs, y_true,
            refer to one iteration over the entire dataset. instead, it
            is just batches_per_epoch parameter updates.
     '''
+
+
     x_unlabeled, x_labeled, y_labeled = check_inputs(x_unlabeled, x_labeled, y_labeled, y_true)
 
     # combine data
@@ -58,6 +61,8 @@ def train_step(return_var, updates, x_unlabeled, inputs, y_true,
 
     # get shape of y_true
     y_shape = y_true.get_shape()[1:K.ndim(y_true)].as_list()
+
+
 
     return_vars_ = np.zeros(shape=(len(return_var)))
     # train batches_per_epoch batches
@@ -117,6 +122,8 @@ def predict(predict_var, x_unlabeled, inputs, y_true, batch_sizes,
     # combined data
     x = np.concatenate((x_unlabeled, x_labeled), 0)
     # get shape of y_true
+    #logging.info("Y-True {}".format("y_true"))
+
     y_shape = y_true.get_shape()[1:K.ndim(y_true)].as_list()
 
     # calculate batches for predict loop

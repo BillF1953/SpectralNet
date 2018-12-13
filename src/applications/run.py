@@ -167,13 +167,45 @@ elif args.dset == 'cc_semisup':
         }
     params.update(cc_semisup_params)
 
+### Tyler and Tristan's Code ###
+
+elif args.dset == 'poker':
+    poker_params = {
+        'n_clusters': 5,
+        'use_code_space': False,
+        'affinity': 'full',
+        'n_nbrs': 5,
+        'scale_nbr': 5,
+        'spec_ne': 300,
+        'spec_lr': 1e-5,
+        'spec_patience': 30,
+        'spec_drop': 0.1,
+        'batch_size': 128,
+        'batch_size_orthonorm': 256,
+        'spec_reg': None,
+        'arch': [
+            {'type': 'softplus', 'size': 50},
+            {'type': 'BatchNormalization'},
+            {'type': 'softplus', 'size': 50},
+            {'type': 'BatchNormalization'},
+            {'type': 'softplus', 'size': 50},
+            {'type': 'BatchNormalization'},
+            ],
+        'generalization_metrics': True, # enable to check out of set generalization error and nmi
+        'use_all_data': False,
+        }
+    params.update(poker_params)
+
+
 # LOAD DATA
 data = get_data(params)
 
 # RUN EXPERIMENT
 x_spectralnet, y_spectralnet = run_net(data, params)
 
-if args.dset in ['cc', 'cc_semisup']:
-    # run plotting script
-    import plot_2d
-    plot_2d.process(x_spectralnet, y_spectralnet, data, params)
+print(x_spectralnet, y_spectralnet)
+
+# if args.dset in ['cc', 'cc_semisup']:
+#     # run plotting script
+#     import plot_2d
+#     plot_2d.process(x_spectralnet, y_spectralnet, data, params)
